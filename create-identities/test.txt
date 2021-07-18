@@ -1,0 +1,38 @@
+Incremental mode
+    Utan random i rolldefinitionsnamnet:
+        Skapa test005:
+            - test005 (skapad)
+            - roll (skapad)
+        Ta bort test005: 
+            - test005 (borta)
+            - role (unknown)
+        Skapa test005:
+            "status": "Failed",
+            "error": {
+                "code": "RoleAssignmentUpdateNotPermitted",
+                "message": "Tenant ID, application ID, principal ID, and scope are not allowed to be updated."
+            }
+            - test005 (skapad)
+            - roll (failed)
+        Ta bort unknown role och test005:
+            - test005 (borta)
+            - roll (borta)
+        Skapa test005:
+            - test005 (skapad)
+            - roll (skapad)
+
+    Random i rolldefinition namnet:
+        Skapa test005:
+            - test005 (skapad)
+            - roll (skapad)
+        Ta bort test005: 
+            - test005 (borta)
+            - role (unknown)
+        Skapa test005:
+            - test005 (skapad)
+            - roll (skapad)
+            - roll (har kvar unknown)
+        Skapa test005 igen fast den finns:
+            - test005 (kvar)
+            - roll (kvar)
+            - roll (har kvar unknown)

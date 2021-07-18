@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "identities": {
+            "type": "Array"
+        },
+        "roleAssignments": {
+            "type": "Array"
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "roles": {
+            "Reader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+            "Storage Blob Data Reader": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2018-11-30",
+            "name": "[concat(parameters('identities')[copyIndex('identityCopy')])]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "identityCopy",
+                "count": "[length(parameters('identities'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[
+                guid(
+                    concat(
+                        variables('roles')[parameters('roleAssignments')[copyIndex('roleCopy')].role],
+                        parameters('roleAssignments')[copyIndex('roleCopy')].name,
+                        parameters('roleAssignments')[copyIndex('roleCopy')].scope
+                    )
+                )
+            ]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('roleAssignments')[copyIndex('roleCopy')].name)]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('roles')[parameters('roleAssignments')[copyIndex('roleCopy')].role]]",
+                "principalId": "[reference(parameters('roleAssignments')[copyIndex('roleCopy')].name).principalId]",
+                "principalType": "ServicePrincipal"
+            },
+            "scope": "[parameters('roleAssignments')[copyIndex('roleCopy')].scope]",
+            "copy": {
+                "name": "roleCopy",
+                "count": "[length(parameters('roleAssignments'))]"
+            }
+        }
+    ]
+}
